@@ -1,91 +1,65 @@
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
+import { supabase } from '@/libs/supabaseClient.js'
 
-// Define os "eventos" que este componente pode emitir (enviar) para o componente pai
-const emit = defineEmits(['addUser']);
+// O 'emit' é a forma do componente filho "conversar" com o componente pai
+const emit = defineEmits(['userCreated'])
 
-// Cria variáveis reativas para cada campo do formulário
-const nome = ref('');
-const email = ref('');
-const senha = ref('');
-const telefone = ref('');
+const novoUsuario = ref({
+  nome: '',
+  email: '',
+  senha: '',
+  telefone: ''
+})
+const feedbackMessage = ref('')
 
-// Função que será chamada quando o formulário for enviado
-const handleSubmit = () => {
-  // Cria um objeto com os dados do novo usuário
-  const newUser = {
-    id: Date.now(), // ID simples baseado no tempo atual
-    nome: nome.value,
-    email: email.value,
-    senha: senha.value, // Em um projeto real, a senha deve ser criptografada!
-    telefone: telefone.value,
-  };
+async function cadastrarUsuario() {
+  const { nome, email, senha, telefone } = novoUsuario.value
+  if (!nome || !email || !senha) {
+    feedbackMessage.value = 'Por favor, preencha nome, email e senha.'
+    return
+  }
 
-  // Emite o evento 'addUser' com os dados do novo usuário para o componente pai
-  emit('addUser', newUser);
+  try {
+    feedbackMessage.value = 'Cadastrando...'
+    
+    // Mesma lógica de inserção de antes
+    const { error } = await supabase
+      .from('usuarios')
+      .insert([{ nome, email, senha, telefone }])
 
-  // Limpa os campos do formulário após o envio
-  nome.value = '';
-  email.value = '';
-  senha.value = '';
-  telefone.value = '';
-};
+    if (error) throw error
+
+    feedbackMessage.value = 'Usuário cadastrado com sucesso!'
+    novoUsuario.value = { nome: '', email: '', senha: '', telefone: '' }
+    
+    // AQUI ESTÁ A MÁGICA: Avisa o componente pai que um novo usuário foi criado.
+    emit('userCreated')
+
+  } catch (error) {
+    console.error('Erro ao cadastrar:', error.message)
+    feedbackMessage.value = `Erro: ${error.message}`
+  }
+}
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit">
+  <div class="card">
     <h2>Cadastrar Novo Usuário</h2>
-    <div class="form-group">
-      <label for="nome">Nome:</label>
-      <input type="text" id="nome" v-model="nome" required />
-    </div>
-    <div class="form-group">
-      <label for="email">Email:</label>
-      <input type="email" id="email" v-model="email" required />
-    </div>
-    <div class="form-group">
-      <label for="senha">Senha:</label>
-      <input type="password" id="senha" v-model="senha" required />
-    </div>
-    <div class="form-group">
-      <label for="telefone">Telefone:</label>
-      <input type="tel" id="telefone" v-model="telefone" />
-    </div>
-    <button type="submit">Cadastrar</button>
-  </form>
+    <form @submit.prevent="cadastrarUsuario">
+      <input type="text" placeholder="Nome" v-model="novoUsuario.nome" required />
+      <input type="email" placeholder="Email" v-model="novoUsuario.email" required />
+      <input type="password" placeholder="Senha" v-model="novoUsuario.senha" required />
+      <input type="text" placeholder="Telefone (opcional)" v-model="novoUsuario.telefone" />
+      <button type="submit">Cadastrar</button>
+    </form>
+    <p v-if="feedbackMessage">{{ feedbackMessage }}</p>
+  </div>
 </template>
 
 <style scoped>
-form {
-  margin-bottom: 2rem;
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-}
-.form-group {
-  margin-bottom: 1rem;
-}
-label {
-  display: block;
-  margin-bottom: 5px;
-}
-input {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-button {
-  background-color: #42b983;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-}
-button:hover {
-  background-color: #36a374;
-}
+/* Estilos do formulário (pode copiar da resposta anterior) */
+.card { padding: 20px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 20px; }
+input { display: block; width: 95%; padding: 8px; margin-bottom: 10px; }
+button { padding: 10px 15px; background-color: #007bff; color: white; border: none; cursor: pointer; }
 </style>

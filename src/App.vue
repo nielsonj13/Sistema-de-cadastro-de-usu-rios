@@ -1,42 +1,53 @@
 <script setup>
-import { ref } from 'vue';
-import UserForm from './components/UserForm.vue';
-import UserList from './components/UserList.vue';
+import { ref, onMounted } from 'vue'
+// Forma correta e mais robusta:
+import { supabase } from '@/libs/supabaseClient.js'
+import UserForm from './components/UserForm.vue'
+import UserList from './components/UserList.vue'
 
-// A lista de usuários será guardada aqui, no componente principal.
-// Começa como uma lista vazia.
-const users = ref([]);
+const usuarios = ref([])
+const loading = ref(false)
 
-// Esta função recebe o novo usuário (que veio do evento do UserForm)
-// e o adiciona na nossa lista 'users'.
-const handleNewUser = (newUser) => {
-  users.value.push(newUser);
-};
+// A função de buscar usuários agora mora aqui, no componente pai
+async function fetchUsuarios() {
+  try {
+    loading.value = true
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    usuarios.value = data
+  } catch (error) {
+    console.error('Erro ao listar:', error.message)
+  } finally {
+    loading.value = false
+  }
+}
+
+// Busca a lista inicial quando o aplicativo carrega
+onMounted(() => {
+  fetchUsuarios()
+})
 </script>
 
 <template>
   <main>
     <h1>Sistema de Cadastro</h1>
     
-    <UserForm @addUser="handleNewUser" />
+    <UserForm @userCreated="fetchUsuarios" />
     
-    <UserList :users="users" />
-
+    <UserList :users="usuarios" :loading="loading" />
+    
   </main>
 </template>
 
 <style scoped>
 main {
-  font-family: sans-serif;
   max-width: 800px;
-  margin: 50px auto;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-h1 {
-  text-align: center;
-  color: #2c3e50;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: sans-serif;
 }
 </style>
