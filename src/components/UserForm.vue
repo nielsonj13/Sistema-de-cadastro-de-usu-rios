@@ -82,9 +82,108 @@ async function cadastrarUsuario() {
 </template>
 
 <style scoped>
-/* Estilos ... */
-.card { padding: 20px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 20px; }
-input { display: block; width: 95%; padding: 8px; margin-bottom: 10px; }
-button { padding: 10px 15px; background-color: #007bff; color: white; border: none; cursor: pointer; }
-button:disabled { background-color: #aaa; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+.card {
+  padding: 30px 25px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  background: #fff;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 0.05);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: 'Inter', sans-serif;
+}
+
+h2 {
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #222;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+input {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 15px;
+  border: 1.8px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+button {
+  padding: 12px 0;
+  background-color: #007bff;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+p {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+/* Feedback de erro */
+p:empty {
+  display: none;
+}
+
+/* Mensagens de erro */
+p[v-cloak][style*="Erro"] {
+  background-color: #fdecea;
+  color: #b00020;
+  border: 1px solid #b00020;
+}
+
+/* Mensagens de sucesso */
+p[v-cloak][style*="sucesso"], p[v-cloak][style*="Sucesso"], p[v-cloak][style*="sucesso!"] {
+  background-color: #e6f4ea;
+  color: #2f855a;
+  border: 1px solid #2f855a;
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+  .card {
+    max-width: 90%;
+    padding: 20px 15px;
+  }
+
+  input, button {
+    font-size: 1rem;
+  }
+}
 </style>
